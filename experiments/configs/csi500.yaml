@@ -1,0 +1,45 @@
+# MADFL experiment configuration (CSI 500, 2021-2024)
+instrument_universe: csi500
+n_stocks: 200
+train_days: 504
+test_days: 21
+n_folds: 28
+seed: 42
+
+gate:
+  alpha_csc: 0.4
+  alpha_psu: 0.4
+  alpha_dsr: 0.2
+  damping_threshold: 0.4
+  psu_window: 20
+
+regime:
+  n_states: 5
+  sticky_beta: 3.0
+  bocpd_hazard: 0.005
+  bocpd_switch_prob: 0.5
+  soft_mix: 0.7
+
+factors:
+  n_families: 5
+  pca_window: 60
+  decay_lambda: 0.05
+  neweywest_lags: 5
+
+portfolio:
+  lambda_bl: 0.3
+  lambda_cvar: 0.4
+  lambda_rb: 0.3
+  cvar_alpha: 0.95
+  d_min: 0.12
+  d_max: 0.25
+  max_weight: 0.05
+
+distillation:
+  teacher_estimators: 500
+  student_estimators: 100
+  feature_pool_size: 44
+  soft_target_weight: 0.5
+
+debate_rounds: 3
+consensus_gate: 0.5

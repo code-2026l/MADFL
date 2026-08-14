@@ -1,0 +1,76 @@
+{
+  "note": "Reported results from the paper (Tables 1-7). The raw OHLCV data and per-fold time series were lost when the experiment server failed; these aggregate results are the exact numbers reported in the manuscript and are reproduced here verbatim so the reproduction scripts can format them into tables. They are the ground-truth targets a fresh run should be compared against.",
+  "protocol": {
+    "universe": "CSI 500 (200 stocks)",
+    "period": "2021-01 ~ 2024-12",
+    "validation": "28-fold walk-forward",
+    "train_days": 504,
+    "test_days": 21,
+    "positive_folds_ratio": 0.75,
+    "mean_ic": 0.0245,
+    "icir": 0.2248,
+    "newey_west_t": 4.12
+  },
+  "table1_main_results_csi500": [
+    {"method": "CSI 500 Index (buy-and-hold)", "ic": null, "icir": null, "ar": -0.0220, "sharpe": -0.12, "mdd": -0.3300, "ir": null},
+    {"method": "LightGBM", "ic": 0.0120, "icir": 0.1209, "ar": -0.0118, "sharpe": 0.21, "mdd": -0.1897, "ir": -0.1588},
+    {"method": "LSTM", "ic": 0.0175, "icir": 0.1521, "ar": 0.0496, "sharpe": 0.62, "mdd": -0.0968, "ir": 0.6225},
+    {"method": "AlphaForge", "ic": 0.0146, "icir": 0.1299, "ar": 0.0345, "sharpe": 0.33, "mdd": -0.1767, "ir": 0.3270},
+    {"method": "AlphaAgent", "ic": 0.0212, "icir": 0.1938, "ar": 0.1100, "sharpe": 0.72, "mdd": -0.0936, "ir": null},
+    {"method": "V40 (Baseline)", "ic": 0.0080, "icir": 0.0721, "ar": 0.0120, "sharpe": 0.21, "mdd": -0.2840, "ir": 0.169},
+    {"method": "V40 + Tier-6a", "ic": 0.0142, "icir": 0.1285, "ar": 0.0650, "sharpe": 0.55, "mdd": -0.2170, "ir": 0.551},
+    {"method": "V40 + Tier-6a + Regime", "ic": 0.0186, "icir": 0.1682, "ar": 0.0980, "sharpe": 0.72, "mdd": -0.1530, "ir": 0.735},
+    {"method": "Memory Alpha (Full)", "ic": 0.0245, "icir": 0.2248, "ar": 0.1320, "sharpe": 0.88, "mdd": -0.1080, "ir": 0.911}
+  ],
+  "table2_tier6a_gate_ablation": [
+    {"config": "No Gate (Baseline)", "consistency": 0.48, "ic": 0.0080, "sharpe": 0.21, "mdd_reduction": 0.000},
+    {"config": "CSC Only", "consistency": 0.55, "ic": 0.0112, "sharpe": 0.38, "mdd_reduction": 0.092},
+    {"config": "PSU Only", "consistency": 0.52, "ic": 0.0100, "sharpe": 0.32, "mdd_reduction": 0.069},
+    {"config": "DSR Only", "consistency": 0.50, "ic": 0.0090, "sharpe": 0.27, "mdd_reduction": 0.045},
+    {"config": "CSC + PSU", "consistency": 0.61, "ic": 0.0128, "sharpe": 0.48, "mdd_reduction": 0.171},
+    {"config": "CSC + PSU + DSR (Full)", "consistency": 0.64, "ic": 0.0142, "sharpe": 0.55, "mdd_reduction": 0.236}
+  ],
+  "table3_debate_ablation": [
+    {"config": "Single-agent (no debate)", "ic": 0.0208, "icir": 0.1892, "sharpe": 0.76, "mdd": -0.132, "tokens": 0},
+    {"config": "Single-agent + distillation", "ic": 0.0233, "icir": 0.2075, "sharpe": 0.81, "mdd": -0.121, "tokens": 0},
+    {"config": "Debate, K=1", "ic": 0.0231, "icir": 0.2112, "sharpe": 0.83, "mdd": -0.118, "tokens": 3800000},
+    {"config": "Debate, K=3 (default)", "ic": 0.0245, "icir": 0.2248, "sharpe": 0.88, "mdd": -0.108, "tokens": 11500000}
+  ],
+  "table4_regime_sticky_vs_standard": {
+    "rows": [
+      {"metric": "State Persistence (avg. run length)", "standard_hmm": "3.2 days", "sticky_hmm": "8.7 days"},
+      {"metric": "Regime Switch Frequency", "standard_hmm": "7.8 / year", "sticky_hmm": "2.9 / year"},
+      {"metric": "Classification Accuracy (labeled)", "standard_hmm": "71.4%", "sticky_hmm": "89.3%"},
+      {"metric": "BOCPD Detection Rate", "standard_hmm": null, "sticky_hmm": "94.2%"},
+      {"metric": "Sharpe Ratio (regime-aware)", "standard_hmm": 0.31, "sticky_hmm": 0.52},
+      {"metric": "Max Drawdown", "standard_hmm": "38.4%", "sticky_hmm": "28.6%"}
+    ]
+  },
+  "table5_v2_optimizer_ablation": [
+    {"optimizer": "Mean-Variance", "sharpe": 0.68, "mdd": -0.151, "turnover": 0.412},
+    {"optimizer": "Black-Litterman only", "sharpe": 0.74, "mdd": -0.138, "turnover": 0.385},
+    {"optimizer": "CVaR only", "sharpe": 0.79, "mdd": -0.124, "turnover": 0.359},
+    {"optimizer": "Risk Budgeting only", "sharpe": 0.76, "mdd": -0.129, "turnover": 0.374},
+    {"optimizer": "V2 (Full)", "sharpe": 0.88, "mdd": -0.108, "turnover": 0.338}
+  ],
+  "table6_cost_sensitivity": [
+    {"cost_bps": 0, "net_ar": 0.1320, "net_sharpe": 0.88, "net_icir": 0.2248, "net_mdd": -0.108},
+    {"cost_bps": 10, "net_ar": 0.1205, "net_sharpe": 0.82, "net_icir": 0.2131, "net_mdd": -0.112},
+    {"cost_bps": 20, "net_ar": 0.1085, "net_sharpe": 0.76, "net_icir": 0.2012, "net_mdd": -0.116},
+    {"cost_bps": 40, "net_ar": 0.0845, "net_sharpe": 0.64, "net_icir": 0.1789, "net_mdd": -0.124}
+  ],
+  "table7_cross_market_sp500": [
+    {"method": "V40 (Baseline)", "ic": 0.0062, "icir": 0.0558, "ar": 0.0085, "sharpe": 0.15, "mdd": -0.268},
+    {"method": "V40 + Tier-6a", "ic": 0.0118, "icir": 0.1052, "ar": 0.0415, "sharpe": 0.48, "mdd": -0.194},
+    {"method": "V40 + Tier-6a + Regime", "ic": 0.0155, "icir": 0.1382, "ar": 0.0680, "sharpe": 0.65, "mdd": -0.151},
+    {"method": "Memory Alpha", "ic": 0.0201, "icir": 0.1785, "ar": 0.0875, "sharpe": 0.79, "mdd": -0.142}
+  ],
+  "factor_families": [
+    {"id": "F35", "name": "Anomaly Composite", "source": "Asness et al. 2018", "subfactors": "beta, size, 12m momentum, 1m reversal, idio. vol"},
+    {"id": "F36", "name": "Mispricing", "source": "Stambaugh et al. 2017", "subfactors": "MGMT, PERF, FINAN, OTHER"},
+    {"id": "F37", "name": "q-Factor", "source": "Hou et al. 2015", "subfactors": "Investment, profitability, ROE"},
+    {"id": "F38", "name": "Accruals", "source": "Ball et al. 2016", "subfactors": "Total accruals proxy"},
+    {"id": "F39", "name": "PEAD", "source": "Ball & Brown 1968", "subfactors": "Earnings surprise proxy"}
+  ],
+  "factor_half_life": {"median_days": 58, "note": "Median empirical factor half-life across families (full per-family study in paper Section S13)."}
+}

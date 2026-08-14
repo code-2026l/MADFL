@@ -1,0 +1,27 @@
+# data & artifacts
+data/
+outputs/*
+!outputs/walkforward/
+outputs/walkforward/*
+!outputs/walkforward/reported_results.json
+*.log
+*.pdf
+__pycache__/
+*.pyc
+.env
+
+# manuscript source (double-blind review: do not publish before acceptance)
+paper/
+
+# packaging
+*.egg-info/
+build/
+dist/
+
+# environment
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
