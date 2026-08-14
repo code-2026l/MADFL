@@ -45,9 +45,12 @@ MADFL/
 ```
 
 The original figure files used in the paper (Figures 1-3) are committed under
-`figures/`. The manuscript source (`paper/`) is kept private during the
-double-blind review period (see `.gitignore`), and the repository otherwise
-contains only the code needed to reproduce the experimental results.
+`figures/`, together with `case_study_debate.png` (and `.pdf`), an illustration of
+the September-2022 debate case study: bull/bear arguments, the fusion rule, and the
+factor-weight trajectory 0.31 → 0.19 around fold 11. The manuscript source
+(`paper/`) is kept private during the double-blind review period (see
+`.gitignore`), and the repository otherwise contains only the code needed to
+reproduce the experimental results.
 
 ## Installation
 
