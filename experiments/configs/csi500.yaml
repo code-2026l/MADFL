@@ -1,4 +1,4 @@
-# MADFL experiment configuration (CSI 500, 2021-2024)
+# MADFL experiment configuration (CSI 500; protocol tail window 2020-07-06 .. 2024-12-31)
 instrument_universe: csi500
 n_stocks: 200
 train_days: 504

@@ -66,11 +66,18 @@ class MiningAgent(BaseAgent):
 
 
 class ScreeningAgent(BaseAgent):
-    """Filters candidate factors by IC / ICIR / turnover thresholds."""
+    """Coarse, cheap pre-filter so the adversarial debate is the real arbiter.
+
+    Thresholds are calibrated to the *real scale of candidate factor features*
+    (raw cross-sectional IC is O(1e-2), raw feature churn ~0.7-1.1), NOT to
+    portfolio-scale turnover. The pre-filter only removes grossly negative-IC
+    junk; every survivor goes on to the bull/bear debate, whose evidence scores
+    are the discriminating layer (paper Alg. 1).
+    """
 
     def __init__(self, llm: LLMClient | None = None,
-                 min_ic: float = 0.005, min_icir: float = 0.05,
-                 max_turnover: float = 0.5):
+                 min_ic: float = 0.0, min_icir: float = -0.05,
+                 max_turnover: float = 3.0):
         super().__init__("screening", llm)
         self.min_ic = min_ic
         self.min_icir = min_icir
@@ -158,10 +165,11 @@ class ConsensusProtocol:
     """Orchestrates mining -> screening -> debate -> fusion for a batch."""
 
     def __init__(self, llm: LLMClient | None = None, rounds: int = 3,
-                 min_ic: float = 0.005, min_icir: float = 0.05,
+                 min_ic: float = 0.0, min_icir: float = -0.05,
                  gate: float = 0.5, n_candidates: int = 8):
         self.mining = MiningAgent(llm)
-        self.screening = ScreeningAgent(llm, min_ic=min_ic, min_icir=min_icir)
+        self.screening = ScreeningAgent(llm, min_ic=min_ic, min_icir=min_icir,
+                                        max_turnover=3.0)
         self.debate = DebateAgent(llm, rounds=rounds)
         self.fusion = FusionAgent(llm, rounds=rounds, gate=gate)
         self.n_candidates = n_candidates

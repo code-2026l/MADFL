@@ -97,3 +97,10 @@ class MemoryAlphaConfig:
     # Data
     instrument_universe: str = "csi500"
     n_stocks: int = 200
+
+    # ---- ablation switches (defaults reproduce the legacy behaviour) ----
+    use_gate: bool = False            # Tier-6a gate damps the signal (Eq. 10)
+    use_regime: bool = False          # regime-scored exposure scaling
+    portfolio_mode: str = "v2"        # v2 | mv | bl | cvar | rb
+    use_distillation: bool = True     # False = teacher-only predictions
+    use_consensus: bool = False       # adversarial factor screening in fit()

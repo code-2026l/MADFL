@@ -77,8 +77,15 @@ class FeaturePool:
 
     def select(self, X: pd.DataFrame, age_by_feature: dict | None = None
                ) -> pd.DataFrame:
-        """Return the columns of ``X`` that belong to the pool."""
-        cols = [c for c in self.features if c in X.columns]
+        """Return the columns of ``X`` that belong to the pool.
+
+        The column ORDER of ``X`` is preserved (not the ICIR-ranked order of
+        ``self.features``): teacher/student are trained on frames whose columns
+        are ordered by feature index, so the same order must be used at
+        prediction time or gradient-boosted models reject the frame with a
+        feature_names mismatch.
+        """
+        cols = [c for c in X.columns if c in self.features]
         return X[cols]
 
 

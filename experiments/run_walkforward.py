@@ -53,21 +53,27 @@ def load_config(path: str) -> MemoryAlphaConfig:
 
 
 def load_ohlcv(path: str, n_stocks: int):
-    """Load a long-format OHLCV CSV into (returns, volume, market)."""
+    """Load a long-format OHLCV CSV into (returns, volume, market).
+
+    Only names covering the full evaluation window are kept (>= 1200 price
+    points; the panel median is 1699), so recently-listed stocks cannot
+    truncate the panel via the ``T = min(...)`` alignment below.
+    """
     import pandas as pd
     df = pd.read_csv(path)
     df["date"] = pd.to_datetime(df["date"])
-    codes = df["code"].unique()[:n_stocks]
-    returns, volume = [], []
-    for code in codes:
+    all_codes = df["code"].unique()
+    returns, volume, kept = [], [], []
+    for code in all_codes:
         sub = df[df["code"] == code].sort_values("date")
         px = sub["close"].values
-        if px.size > 1:
+        if px.size >= 1200:  # require full-window coverage
             returns.append(np.diff(np.log(px)))
             volume.append(sub["volume"].values[:-1])
-        else:
-            returns.append(np.zeros(1))
-            volume.append(sub["volume"].values)
+            kept.append(code)
+        if len(kept) >= n_stocks:
+            break
+    print(f"[MADFL] kept {len(kept)}/{len(all_codes)} stocks with full-window coverage")
     T = min(len(r) for r in returns)
     returns = np.stack([r[:T] for r in returns], axis=1)
     volume = np.stack([v[:T] for v in volume], axis=1)
@@ -83,6 +89,8 @@ def main() -> None:
                     help="CSV of OHLCV data (date,code,open,high,low,close,volume)")
     ap.add_argument("--n-stocks", type=int, default=None)
     ap.add_argument("--folds", type=int, default=None)
+    ap.add_argument("--fold-start", type=int, default=0)
+    ap.add_argument("--fold-end", type=int, default=None)
     ap.add_argument("--out", type=str, default="outputs/walkforward",
                     help="Output directory for results")
     args = ap.parse_args()
@@ -105,9 +113,11 @@ def main() -> None:
 
     print(f"[MADFL] universe={cfg.instrument_universe} "
           f"stocks={returns.shape[1]} folds={cfg.n_folds} "
-          f"days={returns.shape[0]}")
+          f"days={returns.shape[0]} slice=[{args.fold_start},{args.fold_end})")
 
-    result = run_walkforward(returns, volume, market, cfg)
+    result = run_walkforward(returns, volume, market, cfg,
+                             fold_start=args.fold_start,
+                             fold_end=args.fold_end)
 
     print("\n=== Walk-forward results ===")
     for key in ("mean_ic", "icir", "annualized_return", "sharpe",
@@ -119,11 +129,12 @@ def main() -> None:
     # persist machine-readable results so reproduce_tables can format them
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
+    suffix = f"_f{args.fold_start}-{args.fold_end}" if (args.fold_start or args.fold_end) else ""
     serializable = {k: (v.tolist() if isinstance(v, np.ndarray) else v)
                     for k, v in result.items()}
-    with open(out / "run_results.json", "w") as f:
+    with open(out / f"run_results{suffix}.json", "w") as f:
         json.dump(serializable, f, indent=2, default=str)
-    print(f"\n[Step 1] Results written to {out / 'run_results.json'}")
+    print(f"\n[Step 1] Results written to {out / 'run_results{suffix}.json'}")
     print(f"[Step 2] Format tables:  python scripts/reproduce_tables.py "
           f"--results {out / 'run_results.json'}")
 

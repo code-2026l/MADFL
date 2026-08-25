@@ -9,8 +9,7 @@ Two core orchestration protocols:
   * Cross-generation knowledge distillation (distillation/memory_alpha.py)
 
 Reference:
-  "Memory Alpha: Taming the Discover-and-Forget Loop with Multi-Agent
-   Consensus and Distillation" (WSDM 2027).
+  "Memory Alpha: What Survives Honest Walk-Forward Evaluation?" (WSDM 2027).
 """
 
 from madfl.config import MemoryAlphaConfig, GateConfig, RegimeConfig, \

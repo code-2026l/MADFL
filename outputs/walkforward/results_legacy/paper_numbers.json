@@ -1,0 +1,92 @@
+{
+  "flagship_variant": "rev_regime_gate",
+  "signal": "short-term reversal (equal-weight multi-family, fixed economic sign)",
+  "ic": 0.01794193446451591,
+  "icir": 0.46686604508249013,
+  "t_paired_fold": 2.470422901737077,
+  "t_nw_daily": 2.630530534119139,
+  "n_folds": 28,
+  "n_oos_days": 560,
+  "pos_day_fraction": 0.5482142857142858,
+  "sharpe": 0.48725341449424453,
+  "mdd": -0.2134476954969228,
+  "ar": 0.08213566153248841,
+  "turnover": 0.3666644069955973,
+  "consistency": 0.5482142857142858,
+  "index_ar": -0.033,
+  "index_mdd": -0.3366,
+  "index_sharpe": -0.147,
+  "dose_response": {
+    "no_gate": {
+      "ar": 0.028582435663984773,
+      "sharpe": 0.23735290056315173,
+      "mdd": -0.2336032612339196,
+      "turnover": 0.423990403929004
+    },
+    "floor_0.50": {
+      "ar": 0.0464069322760039,
+      "sharpe": 0.3201135769068724,
+      "mdd": -0.2336032612339271,
+      "turnover": 0.4178172929366971
+    },
+    "floor_0.25": {
+      "ar": 0.08213566153248841,
+      "sharpe": 0.48725341449424453,
+      "mdd": -0.2134476954969228,
+      "turnover": 0.3666644069955973
+    },
+    "floor_0.00": {
+      "ar": 0.2024435969095164,
+      "sharpe": 0.837359758966909,
+      "mdd": -0.20311586772260232,
+      "turnover": 0.5068330842173019
+    }
+  },
+  "factor_half_life_days": [
+    12.842942335234545,
+    11.596362176634607,
+    14.143519296151354,
+    12.061998318763251,
+    13.75824668418704
+  ],
+  "factor_families": [
+    "F35_anomaly",
+    "F36_mispricing",
+    "F37_qfactor",
+    "F38_accruals",
+    "F39_pead"
+  ],
+  "cross_market_fast_protocol": {
+    "protocol": "28-fold walk-forward, 504-day train, 28x21-day OOS ending 2024-12, rank long-short",
+    "csi500": {
+      "n_stocks": 160,
+      "raw_mean_ic": -0.0187,
+      "raw_t": -2.67,
+      "raw_t_nw": -2.77,
+      "raw_icir": -0.113,
+      "reversal_ar": 0.0082,
+      "reversal_sharpe": 0.227,
+      "reversal_mdd": -0.066,
+      "turnover": 0.347,
+      "net_5bps": -0.0356,
+      "net_10bps": -0.0793,
+      "hmm_gate_sharpe_floor025": -0.114,
+      "transparent_gate_sharpe_floor025": 0.347
+    },
+    "sp500": {
+      "n_stocks": 400,
+      "raw_mean_ic": -0.0070,
+      "raw_t": -0.98,
+      "raw_t_nw": -1.05,
+      "raw_icir": -0.042,
+      "reversal_ar": 0.0145,
+      "reversal_sharpe": 0.540,
+      "reversal_mdd": -0.023,
+      "turnover": 0.337,
+      "net_5bps": -0.0279,
+      "net_10bps": -0.0704,
+      "hmm_gate_sharpe_floor025": 0.395,
+      "transparent_gate_sharpe_floor025": 0.579
+    }
+  }
+}

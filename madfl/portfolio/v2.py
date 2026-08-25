@@ -80,8 +80,12 @@ def drawdown_circuit_breaker(weights: np.ndarray, current_drawdown: float,
 class V2Optimizer:
     """Scalarized V2 optimizer with a drawdown circuit breaker."""
 
-    def __init__(self, config: PortfolioConfig | None = None):
+    def __init__(self, config: PortfolioConfig | None = None, mode: str = "v2"):
+        # `mode` accepted for compatibility with the staged pipeline's
+        # V2Optimizer(..., mode=...) call; the local optimizer implements the
+        # full scalarized V2 (BL + CVaR + risk-budget) objective regardless.
         self.cfg = config or PortfolioConfig()
+        self.mode = mode
 
     def _objective(self, w: np.ndarray, returns: np.ndarray, mu: np.ndarray,
                    cov: np.ndarray, views: np.ndarray) -> float:

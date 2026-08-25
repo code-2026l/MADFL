@@ -4,8 +4,7 @@ setup(
     name="madfl",
     version="1.0.0",
     description=(
-        "Memory Alpha: Taming the Discover-and-Forget Loop with "
-        "Multi-Agent Consensus and Distillation."
+        "Memory Alpha: What Survives Honest Walk-Forward Evaluation?"
     ),
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",

@@ -1,27 +1,23 @@
-# data & artifacts
-data/
-outputs/*
-!outputs/walkforward/
-outputs/walkforward/*
-!outputs/walkforward/reported_results.json
-*.log
-*.pdf
+# bytecode / caches
 __pycache__/
 *.pyc
-.env
-
-# manuscript source (double-blind review: do not publish before acceptance)
-paper/
-
-# packaging
 *.egg-info/
+pip_cache/
 build/
 dist/
+
+# logs & pdfs
+*.log
+*.pdf
 
 # environment
 .venv/
 venv/
+.env
 
 # IDE
 .vscode/
 .idea/
+
+# manuscript source (double-blind review: do not publish before acceptance)
+paper/

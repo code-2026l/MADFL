@@ -1,151 +1,196 @@
-# MADFL — Memory Alpha: Taming the Discover-and-Forget Loop with Multi-Agent Consensus and Distillation
+# MADFL — Memory Alpha: What Survives Honest Walk-Forward Evaluation?
 
-Memory Alpha is a self-evolving, multi-agent framework for systematic alpha factor mining. It treats factor mining as a **discover-and-forget loop** — signals are discovered, decay, and are re-learned from scratch — and manages factors across their full lifecycle: discovery, validation, calibration, deployment, and cross-generation distillation. This repository is the codebase behind the paper of the same name (WSDM 2027), and provides the code needed to reproduce the paper's experiments.
+**WSDM 2027 submission · double-blind review period · anonymous repository**
 
-The framework is built on two orchestration protocols:
+Memory Alpha is a full-stack, agentic alpha-factor-mining framework released
+together with a rigorous, fully reproducible evaluation protocol. The paper
+asks a pointed question: *when an LLM-driven agentic factor-mining pipeline is
+evaluated honestly — date-aligned, end-aligned, intent-to-treat walk-forward —
+what actually survives?*
 
-- **Adversarial multi-agent consensus** — mining, screening, debate (bull vs. bear), and fusion agents argue for and against every candidate signal, so a factor must survive structured scrutiny before entering the library.
-- **Cross-generation knowledge distillation** — a teacher–student architecture carries knowledge from a growing factor library into a fixed-capacity model, cutting factor rediscovery by 67% and acting as a replay buffer against catastrophic forgetting.
+The answer, backed by the code and data in this repository (28-fold
+walk-forward, 160 CSI 500 stocks, seed 42, OOS 2022-08 .. 2024-12):
 
-Around these protocols the pipeline integrates a Tier-6a signal gate (CSC + PSU + DSR), sticky-HMM + BOCPD regime detection, multi-family factor synthesis, and a V2 portfolio optimizer (Black-Litterman + CVaR + risk budgeting + drawdown circuit breaker).
+1. **The honest cross-sectional signal is short-term reversal, not momentum**
+   (OOS IC +0.018, Newey–West t = +2.63, direction fixed).
+2. **Search bias — not weak analysis — inflates agentic claims.** With the
+   legacy in-sample screen the agent's "best" family reports IC **+0.1697**
+   (ICIR +5.24); after our correction the same search yields **+0.0009**
+   (t = 0.38).
+3. **Once the search is corrected, the two advertised mechanisms separate
+   cleanly:** cross-generation distillation *improves* OOS IC
+   (**+0.0028 → +0.0116**, paired t = 4.69), while LLM debate contributes
+   nothing (debate-only: **+0.0009**, t = 0.38; debate on top of distillation
+   *lowers* IC to +0.0079).
+4. **The reversal edge is economically immaterial** (gross Sharpe ≈ 0.005,
+   negative net of costs); the "regime-gated" Sharpe lift (0.49–0.84) is a
+   latent-state mislabeling artifact.
+
+## Contributions
+
+- **HAE — Honest Agentic Evaluation protocol** (paper §4.1): formal
+  definitions of *panel selection bias* and *latent-state arbitrage*, a
+  label-permutation bound on gated Sharpe, and an intent-to-treat 28-fold
+  walk-forward procedure (Algorithm 1).
+- **CDS — Causal Deflation Screening** (paper §4.6): the first screening
+  *algorithm* that prices an agent's search. CDS treats the search as a
+  stochastic hypothesis-generating process, measures its effective size
+  K_eff on a strictly-causal prior window (spectral participation ratio),
+  corrects the winner's-curse inflation of every reported IC via a
+  block-permutation null, and serves as both a deployable selection rule and
+  an honest reporting metric (the deflated IC, IC\*).
+- **Full-stack agentic miner**: multi-family factor synthesis (5 anomaly
+  families), adversarial multi-agent consensus (bull/bear debate + fusion),
+  Tier-6a signal gate (CSC + PSU + DSR), sticky-HMM + BOCPD regime detection,
+  and a V2 portfolio optimizer (Black–Litterman + CVaR + risk budgeting +
+  drawdown circuit breaker).
 
 ## Repository structure
-
-The manuscript reports a 28-fold walk-forward study on CSI 500 (2021–2024) with cross-market validation on S&P 500. The paper's reported numbers are stored in `outputs/walkforward/reported_results.json` so the tables and figures can be reproduced, and the same pipeline can be re-run on your own OHLCV data.
 
 ```
 MADFL/
 ├── madfl/                  # core package
 │   ├── agents/             # mining / screening / debate / fusion agents
-│   ├── gate/               # Tier-6a signal gate (CSC, PSU, DSR)
-│   ├── regime/             # sticky HMM + BOCPD regime detection
-│   ├── factors/            # multi-family factor synthesis (5 families)
-│   ├── portfolio/          # V2 optimizer (BL + CVaR + risk budget + CB)
 │   ├── distillation/       # cross-generation teacher-student distillation
+│   ├── factors/            # multi-family factor synthesis (5 families)
+│   ├── gate/               # Tier-6a signal gate (CSC, PSU, DSR)
+│   ├── portfolio/          # V2 optimizer (BL + CVaR + risk budget + CB)
+│   ├── regime/             # sticky HMM + BOCPD regime detection
+│   ├── pipeline.py         # walk-forward orchestration + CDS screening
 │   ├── config.py           # hyperparameters
-│   ├── utils.py            # IC/ICIR, Newey-West, drawdown analytics
-│   ├── baselines.py        # comparison baselines (LightGBM, LSTM, AlphaForge)
-│   └── pipeline.py         # 28-fold walk-forward orchestration
-├── experiments/            # run the 28-fold walk-forward on real OHLCV data
-│   ├── run_walkforward.py  # entry point: data -> walk-forward results
-│   └── configs/csi500.yaml # experiment hyperparameters
+│   └── utils.py            # IC/ICIR, Newey-West, drawdown analytics
+├── experiments/            # reproduction entry points
+│   ├── run_ablation.py     # the 12-variant distillation x debate grid + CDS
+│   ├── run_walkforward.py  # single-pipeline walk-forward entry point
+│   ├── merge_shards.py     # stitch sharded fold runs
+│   ├── configs/csi500.yaml # experiment hyperparameters
+│   └── data/               # CSI 500 OHLCV panel used in the paper (public)
 ├── scripts/
-│   └── reproduce_tables.py # format reported / fresh-run tables
-├── figures/                # original figure files from the paper
-│   ├── architecture.png   (Figure 1: framework overview)
-│   ├── results_panel.png  (Figure 2: 4-panel main results)
-│   └── regime_timeline.png (Figure 3: regime assignments timeline)
+│   └── reproduce_tables.py # format all paper tables from the results
+├── figures/                # paper figures (architecture / results / regime)
 ├── outputs/
-│   └── walkforward/        # reported results (ground-truth targets)
-├── tests/                  # unit + smoke tests
+│   └── walkforward/
+│       ├── reported_results.json   # authoritative numbers for Tables 1-9
+│       ├── results_cds/            # per-fold series, 12 debate/distillation variants
+│       └── results_legacy/         # gate / reversal / V2 / cross-market outputs
+├── tests/
+│   └── test_smoke.py       # smoke test (runs 1 fold)
 ├── requirements.txt
 ├── setup.py
 ├── LICENSE
 └── README.md
 ```
 
-The original figure files used in the paper (Figures 1-3) are committed under
-`figures/`, together with `case_study_debate.png`, an illustration of
-the September-2022 debate case study: bull/bear arguments, the fusion rule, and the
-factor-weight trajectory 0.31 → 0.19 around fold 11. The manuscript source
-(`paper/`) is kept private during the double-blind review period (see
-`.gitignore`), and the repository otherwise contains only the code needed to
-reproduce the experimental results.
+The manuscript source is kept private during the double-blind review period
+(`paper/` is git-ignored); everything needed to reproduce and verify the
+experimental results is public here.
 
 ## Installation
 
 ```bash
-git clone https://github.com/code-2026l/MADFL.git
+git clone <anonymous-repo-url> MADFL
 cd MADFL
+python -m venv .venv && source .venv/bin/activate   # optional but recommended
 pip install -r requirements.txt     # or: pip install -e .
 ```
 
-Python 3.9+; core deps: `numpy`, `pandas`, `scipy`, `scikit-learn`, `xgboost`, `lightgbm`, `numba`, `hmmlearn`, `matplotlib`.
+## Reproduce the paper
 
-## Reproducing the paper
-
-There are two complementary steps. The first exposes the paper's reported results; the second re-runs the pipeline on a data file of your own.
-
-### 1. Format the paper's reported results
-
-The aggregate numbers in the manuscript (Tables 1-7) are stored verbatim in `outputs/walkforward/reported_results.json`. This is the ground truth a fresh run should be compared against.
+### 1. Print the paper's tables (ground-truth targets)
 
 ```bash
-# Print Tables 1-7 exactly as reported in the paper
 python scripts/reproduce_tables.py
 ```
 
-### 2. Re-run the 28-fold walk-forward on real data
+This reads `outputs/walkforward/reported_results.json` (the authoritative
+numbers for Tables 1–9 and the CDS diagnostics, Section S10.1) and prints the
+formatted tables. The raw per-fold series for the 12 debate/distillation
+variants are in `outputs/walkforward/results_cds/*.json`.
 
-The pipeline reproduces the paper's protocol on real OHLCV data. Prepare a CSV with columns `date, code, open, high, low, close, volume` for your universe and run:
-
-```bash
-python experiments/run_walkforward.py \
-    --config experiments/configs/csi500.yaml \
-    --data path/to/your_ohlcv.csv
-
-# Then format the fresh run's metrics
-python scripts/reproduce_tables.py --results outputs/walkforward/run_results.json
-```
-
-The walks forward in 21-day test steps over 28 folds with a 504-day training window, matching the paper's protocol. Compare the fresh run's OOS IC / ICIR / Sharpe against the reported values in `outputs/walkforward/reported_results.json`.
-
-> **About the data.** The paper's experiments used CSI 500 / S&P 500 OHLCV data that we cannot redistribute. The reported numbers in the paper are the surviving record of those experiments; this repository provides the code to repeat the protocol on any licensed or freely available OHLCV panel.
-
-## Key results
-
-The table below is the output of `python scripts/reproduce_tables.py` — these are the numbers reported in Table 1 of the paper.
-
-| Method | IC | ICIR | AR | Sharpe | MDD |
-|---|---|---|---|---|---|
-| CSI 500 Index (buy-and-hold) | — | — | –2.20% | –0.12 | –33.00% |
-| LightGBM | 0.0120 | 0.1209 | –1.18% | 0.21 | –18.97% |
-| LSTM | 0.0175 | 0.1521 | 4.96% | 0.62 | –9.68% |
-| AlphaForge | 0.0146 | 0.1299 | 3.45% | 0.33 | –17.67% |
-| AlphaAgent | 0.0212 | 0.1938 | 11.00% | 0.72 | –9.36% |
-| V40 (Baseline) | 0.0080 | 0.0721 | 1.20% | 0.21 | –28.40% |
-| V40 + Tier-6a | 0.0142 | 0.1285 | 6.50% | 0.55 | –21.70% |
-| V40 + Tier-6a + Regime | 0.0186 | 0.1682 | 9.80% | 0.72 | –15.30% |
-| **Memory Alpha (Full)** | **0.0245** | **0.2248** | **13.20%** | **0.88** | **–10.80%** |
-
-21 of 28 folds (75%) are positive; the positive mean IC is significant against the index (Newey-West corrected, `p < 0.001`). Full breakdowns — gate ablation, debate ablation, V2 optimizer ablation, cost sensitivity, and S&P 500 cross-market results — are reproduced by `scripts/reproduce_tables.py`.
-
-## Tests
+### 2. Re-run the pipeline from raw OHLCV
 
 ```bash
-python -m pytest tests/ -q
+# the full 12-variant distillation x debate grid (28 folds each, ~1-2 h total
+# on a multi-core machine; each variant can be sharded with --fold-start/--fold-end)
+python experiments/run_ablation.py --variant deb_none --out outputs/walkforward/results_cds
+python experiments/run_ablation.py --variant deb_single --out outputs/walkforward/results_cds
+python experiments/run_ablation.py --variant deb_k1 --out outputs/walkforward/results_cds
+python experiments/run_ablation.py --variant deb_k3 --out outputs/walkforward/results_cds
+python experiments/run_ablation.py --variant deb_k1_nodistill --out outputs/walkforward/results_cds
+python experiments/run_ablation.py --variant deb_k3_nodistill --out outputs/walkforward/results_cds
+python experiments/run_ablation.py --variant defl_none --out outputs/walkforward/results_cds
+python experiments/run_ablation.py --variant defl_single --out outputs/walkforward/results_cds
+python experiments/run_ablation.py --variant defl_k1 --out outputs/walkforward/results_cds
+python experiments/run_ablation.py --variant defl_k3 --out outputs/walkforward/results_cds
+python experiments/run_ablation.py --variant defl_k1_nodistill --out outputs/walkforward/results_cds
+python experiments/run_ablation.py --variant defl_k3_nodistill --out outputs/walkforward/results_cds
+
+# format a fresh run's metrics into the same layout
+python scripts/reproduce_tables.py --results outputs/walkforward/results_cds/defl_k3.json
 ```
 
-The test suite exercises all core components (factor synthesis, regime detection, distillation, portfolio optimization, walk-forward pipeline) with 14 smoke tests.
+Variants:
+- `deb_*` — honest walk-forward with **causal-prior-window** consensus
+  screening (no in-sample selection leak);
+- `defl_*` — the same grid under **Causal Deflation Screening (CDS)**,
+  i.e. the paper's headline numbers (Table 2);
+- distillation `{on, off}` × debate `{off, K=1, K=3}` — the full 2×2 grid;
+- `defl_k3` is the full system; `defl_k1_nodistill` isolates the debate
+  (the reviewer-facing question "debate on, distillation off").
 
-## Using the LLM debate
+> **Reproducibility note.** The reported numbers were produced with the exact
+> dependency versions pinned in `requirements.txt` (Python 3.11, Linux,
+> numpy 1.26.4 / pandas 2.1.4 / xgboost 2.0.3 / lightgbm 3.3.5 /
+> scikit-learn 1.7.2 / scipy 1.16.3). Gradient-boosted models are
+> deterministic for a fixed environment, but per-fold IC can shift by
+> ~1e-3–5e-3 across platforms/versions (BLAS, xgboost/lightgbm point
+> releases). For verification of the reported *tables*, pin the exact
+> versions and compare against `outputs/walkforward/reported_results.json`;
+> the aggregate metrics (mean IC, ICIR, Sharpe) are stable to well within
+> ±1e-3, and the CDS diagnostics (K_eff, σ̂, IC\*) are version-robust.
 
-The adversarial consensus module ships with a deterministic fallback (`RuleBasedLLMClient`) so the pipeline runs without a proprietary model. To use a frontier reasoning model, subclass `LLMClient`:
+### 3. Run the smoke test
 
-```python
-from madfl.agents.base import LLMClient
-from madfl.pipeline import run_walkforward
-
-class MyLLM(LLMClient):
-    def complete(self, prompt: str) -> str:
-        ...  # call your model and return its response
-
-result = run_walkforward(returns, volume, market, llm=MyLLM())
+```bash
+python -m pytest tests/ -q          # or: python tests/test_smoke.py
 ```
 
-## License
+## Data
 
-MIT License. See [LICENSE](LICENSE).
+- `experiments/data/csi500_200.csv` — the CSI 500 OHLCV panel used in the
+  paper: 200 candidate names, full daily coverage 2019-01-02 .. 2024-12-31,
+  sourced from public market data (akshare). The protocol keeps the 160 names
+  with full coverage on the tail window (2020-07-06 .. 2024-12-31) and
+  date-/end-aligns the 28-fold walk-forward on it.
+- `outputs/walkforward/results_legacy/spx_reversal_fast.json` — the S&P 500
+  cross-market run (Table 8 / Section S6), on the same protocol.
+- The MNIST / MovieLens streaming-transfer numbers (Table 9 / Section S18)
+  are summarized in `reported_results.json`; the adaptation scripts follow
+  the same `madfl` modules with hard voting replacing the LLM debate.
+
+All data are public prices and volumes; no non-public, insider, or proprietary
+data are used.
+
+## Double-blind note
+
+During the double-blind review period this repository is anonymous: no author
+identifiers appear in code, configuration, or metadata, and the manuscript
+source (`paper/`) is git-ignored. After acceptance the manuscript will be
+published and the repository will be linked.
 
 ## Citation
 
 ```bibtex
 @inproceedings{madfl2027,
-  title={Memory Alpha: Taming the Discover-and-Forget Loop with Multi-Agent Consensus and Distillation},
-  booktitle={Proceedings of the 20th ACM International Conference on Web Search and Data Mining (WSDM)},
-  year={2027},
-  note={Anonymized version during review}
+  title     = {Memory Alpha: What Survives Honest Walk-Forward Evaluation?},
+  author    = {Anonymous, WSDM 2027 submission},
+  booktitle = {Proceedings of the 30th ACM International Conference on Web
+               Search and Data Mining (WSDM)},
+  year      = {2027},
+  note      = {Under double-blind review; anonymized for submission}
 }
 ```
 
-> **Note for the review period.** Per the venue's double-blind policy, please keep this repository private (or publish only after acceptance / as explicitly permitted) until the review process completes.
+## License
+
+MIT — see [LICENSE](LICENSE).
