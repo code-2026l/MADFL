@@ -141,13 +141,17 @@ Variants:
 > **Reproducibility note.** The reported numbers were produced with the exact
 > dependency versions pinned in `requirements.txt` (Python 3.11, Linux,
 > numpy 1.26.4 / pandas 2.1.4 / xgboost 2.0.3 / lightgbm 3.3.5 /
-> scikit-learn 1.7.2 / scipy 1.16.3). Gradient-boosted models are
-> deterministic for a fixed environment, but per-fold IC can shift by
-> ~1e-3–5e-3 across platforms/versions (BLAS, xgboost/lightgbm point
-> releases). For verification of the reported *tables*, pin the exact
-> versions and compare against `outputs/walkforward/reported_results.json`;
-> the aggregate metrics (mean IC, ICIR, Sharpe) are stable to well within
-> ±1e-3, and the CDS diagnostics (K_eff, σ̂, IC\*) are version-robust.
+> scikit-learn 1.7.2 / scipy 1.16.3). Gradient-boosted teachers are
+> deterministic for a *fixed* environment, but **per-fold IC is not
+> bit-reproducible across platforms/versions**: we measured single-fold
+> shifts of up to ~2e-2 (Windows/py3.12 vs Linux/py3.11, same xgboost point
+> release), which average out to ~±3e-3 on the 28-fold mean IC. The
+> qualitative conclusions (reversal direction; distillation > debate; CDS
+> collapsing the in-sample screen from 0.1697 to 0.0009) are robust to this
+> noise; the CDS diagnostics (K_eff, σ̂, IC\*) are version-robust. For
+> table-level verification, pin the exact versions on a Linux/py3.11
+> environment and compare against
+> `outputs/walkforward/reported_results.json`.
 
 ### 3. Run the smoke test
 
